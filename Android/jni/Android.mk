@@ -34,6 +34,7 @@ LOCAL_SRC_FILES := \
     $(FTGL_SRC_LOCATION)/src/FTFont/FTPixmapFont.cpp \
     $(FTGL_SRC_LOCATION)/src/FTFont/FTPolygonFont.cpp \
     $(FTGL_SRC_LOCATION)/src/FTFont/FTTextureFont.cpp \
+    $(FTGL_SRC_LOCATION)/src/FTFont/FTExtrudeFont.cpp \
     $(FTGL_SRC_LOCATION)/src/FTGL/ftglesGlue.cpp \
     $(FTGL_SRC_LOCATION)/src/FTGlyph/FTBitmapGlyph.cpp \
     $(FTGL_SRC_LOCATION)/src/FTGlyph/FTBufferGlyph.cpp \
@@ -43,6 +44,7 @@ LOCAL_SRC_FILES := \
     $(FTGL_SRC_LOCATION)/src/FTGlyph/FTPixmapGlyph.cpp \
     $(FTGL_SRC_LOCATION)/src/FTGlyph/FTPolygonGlyph.cpp \
     $(FTGL_SRC_LOCATION)/src/FTGlyph/FTTextureGlyph.cpp \
+    $(FTGL_SRC_LOCATION)/src/FTGlyph/FTExtrudeGlyph.cpp \
     $(FTGL_SRC_LOCATION)/src/FTLayout/FTLayout.cpp \
     $(FTGL_SRC_LOCATION)/src/FTLayout/FTLayoutGlue.cpp \
     $(FTGL_SRC_LOCATION)/src/FTLayout/FTSimpleLayout.cpp \

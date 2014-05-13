@@ -94,38 +94,39 @@ FTExtrudeGlyphImpl::FTExtrudeGlyphImpl(FT_GlyphSlot glyph, float _depth,
     frontOutset = _frontOutset;
     backOutset = _backOutset;
 
-    if(useDisplayList)
-    {
-        glList = glGenLists(3);
-
-        /* Front face */
-        glNewList(glList + 0, GL_COMPILE);
-        RenderFront();
-        glEndList();
-
-        /* Back face */
-        glNewList(glList + 1, GL_COMPILE);
-        RenderBack();
-        glEndList();
-
-        /* Side face */
-        glNewList(glList + 2, GL_COMPILE);
-        RenderSide();
-        glEndList();
-
-        delete vectoriser;
-        vectoriser = NULL;
-    }
+//    if(useDisplayList)
+//    {
+//        glList = glGenLists(3);
+//
+//        /* Front face */
+//        glNewList(glList + 0, GL_COMPILE);
+//        RenderFront();
+//        glEndList();
+//
+//        /* Back face */
+//        glNewList(glList + 1, GL_COMPILE);
+//        RenderBack();
+//        glEndList();
+//
+//        /* Side face */
+//        glNewList(glList + 2, GL_COMPILE);
+//        RenderSide();
+//        glEndList();
+//
+//        delete vectoriser;
+//        vectoriser = NULL;
+//    }
 }
 
 
 FTExtrudeGlyphImpl::~FTExtrudeGlyphImpl()
 {
-    if(glList)
-    {
-        glDeleteLists(glList, 3);
-    }
-    else if(vectoriser)
+//    if(glList)
+//    {
+//        glDeleteLists(glList, 3);
+//    }
+//    else
+    if(vectoriser)
     {
         delete vectoriser;
     }
@@ -136,16 +137,17 @@ const FTPoint& FTExtrudeGlyphImpl::RenderImpl(const FTPoint& pen,
                                               int renderMode)
 {
     glTranslatef(pen.Xf(), pen.Yf(), pen.Zf());
-    if(glList)
-    {
-        if(renderMode & FTGL::RENDER_FRONT)
-            glCallList(glList + 0);
-        if(renderMode & FTGL::RENDER_BACK)
-            glCallList(glList + 1);
-        if(renderMode & FTGL::RENDER_SIDE)
-            glCallList(glList + 2);
-    }
-    else if(vectoriser)
+//    if(glList)
+//    {
+//        if(renderMode & FTGL::RENDER_FRONT)
+//            glCallList(glList + 0);
+//        if(renderMode & FTGL::RENDER_BACK)
+//            glCallList(glList + 1);
+//        if(renderMode & FTGL::RENDER_SIDE)
+//            glCallList(glList + 2);
+//    }
+//    else
+    if(vectoriser)
     {
         if(renderMode & FTGL::RENDER_FRONT)
             RenderFront();
@@ -163,27 +165,34 @@ const FTPoint& FTExtrudeGlyphImpl::RenderImpl(const FTPoint& pen,
 void FTExtrudeGlyphImpl::RenderFront()
 {
     vectoriser->MakeMesh(1.0, 1, frontOutset);
-    glNormal3d(0.0, 0.0, 1.0);
-
+    glNormal3f(0.0, 0.0, 1.0);
+    
+    GLfloat colors[4];
+    
     const FTMesh *mesh = vectoriser->GetMesh();
     for(unsigned int j = 0; j < mesh->TesselationCount(); ++j)
     {
         const FTTesselation* subMesh = mesh->Tesselation(j);
         unsigned int polygonType = subMesh->PolygonType();
 
-        glBegin(polygonType);
+        glGetFloatv(GL_CURRENT_COLOR, colors);
+        glBindTexture(GL_TEXTURE_2D, 0);
+        
+        ftglBegin(polygonType);
+        
+        ftglColor4f(colors[0], colors[1], colors[2], colors[3]);
             for(unsigned int i = 0; i < subMesh->PointCount(); ++i)
             {
                 FTPoint pt = subMesh->Point(i);
 
-                glTexCoord2f(pt.Xf() / hscale,
+                ftglTexCoord2f(pt.Xf() / hscale,
                              pt.Yf() / vscale);
 
-                glVertex3f(pt.Xf() / 64.0f,
+                ftglVertex3f(pt.Xf() / 64.0f,
                            pt.Yf() / 64.0f,
                            0.0f);
             }
-        glEnd();
+        ftglEnd();
     }
 }
 
@@ -191,27 +200,34 @@ void FTExtrudeGlyphImpl::RenderFront()
 void FTExtrudeGlyphImpl::RenderBack()
 {
     vectoriser->MakeMesh(-1.0, 2, backOutset);
-    glNormal3d(0.0, 0.0, -1.0);
+    glNormal3f(0.0, 0.0, -1.0);
 
+    GLfloat colors[4];
+    
     const FTMesh *mesh = vectoriser->GetMesh();
     for(unsigned int j = 0; j < mesh->TesselationCount(); ++j)
     {
         const FTTesselation* subMesh = mesh->Tesselation(j);
         unsigned int polygonType = subMesh->PolygonType();
 
-        glBegin(polygonType);
-            for(unsigned int i = 0; i < subMesh->PointCount(); ++i)
+        glGetFloatv(GL_CURRENT_COLOR, colors);
+        glBindTexture(GL_TEXTURE_2D, 0);
+        
+        ftglBegin(polygonType);
+
+        ftglColor4f(colors[0], colors[1], colors[2], colors[3]);
+        for(unsigned int i = 0; i < subMesh->PointCount(); ++i)
             {
                 FTPoint pt = subMesh->Point(i);
 
-                glTexCoord2f(subMesh->Point(i).Xf() / hscale,
+                ftglTexCoord2f(subMesh->Point(i).Xf() / hscale,
                              subMesh->Point(i).Yf() / vscale);
 
-                glVertex3f(subMesh->Point(i).Xf() / 64.0f,
+                ftglVertex3f(subMesh->Point(i).Xf() / 64.0f,
                            subMesh->Point(i).Yf() / 64.0f,
                            -depth);
             }
-        glEnd();
+        ftglEnd();
     }
 }
 
@@ -230,36 +246,46 @@ void FTExtrudeGlyphImpl::RenderSide()
             continue;
         }
 
-        glBegin(GL_QUAD_STRIP);
+        ftglBegin(GL_QUADS);//TODO: JackTest: Original is GL_QUAD_STRIP
             for(size_t j = 0; j <= n; ++j)
             {
-                size_t cur = (j == n) ? 0 : j;
-                size_t next = (cur == n - 1) ? 0 : cur + 1;
-
+                size_t cur = j % n;
+                size_t n1 = (j + 1) % n;
+                size_t n2 = (j + 2) % n;
+                size_t n3 = (j + 3) % n;;
+                
                 FTPoint frontPt = contour->FrontPoint(cur);
-                FTPoint nextPt = contour->FrontPoint(next);
+                FTPoint nPt1 = contour->FrontPoint(n1);
+                //FTPoint nPt2 = contour->FrontPoint(n2);
+                //FTPoint nPt3 = contour->FrontPoint(n3);
                 FTPoint backPt = contour->BackPoint(cur);
+                FTPoint backPt1 = contour->BackPoint(n1);
 
-                FTPoint normal = FTPoint(0.f, 0.f, 1.f) ^ (frontPt - nextPt);
+                FTPoint normal = FTPoint(0.f, 0.f, 1.f) ^ (frontPt - nPt1);
                 if(normal != FTPoint(0.0f, 0.0f, 0.0f))
                 {
-                    glNormal3dv(static_cast<const FTGL_DOUBLE*>(normal.Normalise()));
+                    const FTGL_DOUBLE* pD = static_cast<const FTGL_DOUBLE*>(normal.Normalise());
+                    glNormal3f( pD[0], pD[1], pD[2]);
                 }
 
-                glTexCoord2f(frontPt.Xf() / hscale, frontPt.Yf() / vscale);
+                ftglTexCoord2f(frontPt.Xf() / hscale, frontPt.Yf() / vscale);
 
                 if(contourFlag & ft_outline_reverse_fill)
                 {
-                    glVertex3f(backPt.Xf() / 64.0f, backPt.Yf() / 64.0f, 0.0f);
-                    glVertex3f(frontPt.Xf() / 64.0f, frontPt.Yf() / 64.0f, -depth);
+                    ftglVertex3f(backPt.Xf() / 64.0f, backPt.Yf() / 64.0f, 0.0f);
+                    ftglVertex3f(frontPt.Xf() / 64.0f, frontPt.Yf() / 64.0f, -depth);
+                    ftglVertex3f(nPt1.Xf() / 64.0f, nPt1.Yf() / 64.0f, -depth);
+                    ftglVertex3f(backPt1.Xf() / 64.0f, backPt1.Yf() / 64.0f, 0.0f);
                 }
                 else
                 {
-                    glVertex3f(backPt.Xf() / 64.0f, backPt.Yf() / 64.0f, -depth);
-                    glVertex3f(frontPt.Xf() / 64.0f, frontPt.Yf() / 64.0f, 0.0f);
+                    ftglVertex3f(backPt.Xf() / 64.0f, backPt.Yf() / 64.0f, -depth);
+                    ftglVertex3f(frontPt.Xf() / 64.0f, frontPt.Yf() / 64.0f, 0.0f);
+                    ftglVertex3f(nPt1.Xf() / 64.0f, nPt1.Yf() / 64.0f, 0.f);
+                    ftglVertex3f(backPt1.Xf() / 64.0f, backPt1.Yf() / 64.0f, -depth);
                 }
             }
-        glEnd();
+        ftglEnd();
     }
 }
 
