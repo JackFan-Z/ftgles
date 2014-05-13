@@ -26,7 +26,10 @@
 
 #include "config.h"
 
+#ifdef ANDROID
+#else
 #include <string>
+#endif
 
 #include "FTGL/ftgles.h"
 

@@ -27,8 +27,10 @@
 #include "config.h"
 
 #include <cassert>
+#ifdef ANDROID
+#else
 #include <string> // For memset
-
+#endif
 #include "FTGL/ftgles.h"
 
 #include "FTInternals.h"

@@ -39,6 +39,10 @@
 #include "priorityq-heap.h"
 #include "memalloc.h"
 
+#ifdef ANDROID
+#include <limits.h>
+#endif
+
 #define INIT_SIZE	32
 
 #define TRUE 1
