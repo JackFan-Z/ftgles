@@ -111,6 +111,12 @@ namespace FTGL
 
 #if defined __APPLE_CC__
 #include <TargetConditionals.h>
+#elif defined ANDROID
+#include <strings.h>
+#include <android/log.h>
+#define LOG_FTGLES_TAG "ftgles"
+#define LOG_INFO(...) __android_log_print(ANDROID_LOG_INFO, LOG_FTGLES_TAG, __VA_ARGS__)
+#define LOG_ERROR(...) __android_log_print(ANDROID_LOG_ERROR, LOG_FTGLES_TAG, __VA_ARGS__)
 #endif
 
 #include "FTPoint.h"

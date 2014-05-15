@@ -235,7 +235,8 @@ void FTExtrudeGlyphImpl::RenderBack()
 void FTExtrudeGlyphImpl::RenderSide()
 {
     int contourFlag = vectoriser->ContourFlag();
-
+    //LOG_INFO("RenderSide %d", contourFlag);
+    GLfloat colors[4];
     for(size_t c = 0; c < vectoriser->ContourCount(); ++c)
     {
         const FTContour* contour = vectoriser->Contour(c);
@@ -246,22 +247,20 @@ void FTExtrudeGlyphImpl::RenderSide()
             continue;
         }
 
-        ftglBegin(GL_QUADS);//TODO: JackTest: Original is GL_QUAD_STRIP
-            for(size_t j = 0; j <= n; ++j)
+        glGetFloatv(GL_CURRENT_COLOR, colors);
+        ftglBegin(GL_QUADS);
+        ftglColor4f(colors[0]/2, colors[1]/2, colors[2]/2, colors[3]/2);
+            for(size_t j = 0; j < n; j++ )
             {
                 size_t cur = j % n;
-                size_t n1 = (j + 1) % n;
-                size_t n2 = (j + 2) % n;
-                size_t n3 = (j + 3) % n;;
+                size_t next = (j + 1) % n;
                 
                 FTPoint frontPt = contour->FrontPoint(cur);
-                FTPoint nPt1 = contour->FrontPoint(n1);
-                //FTPoint nPt2 = contour->FrontPoint(n2);
-                //FTPoint nPt3 = contour->FrontPoint(n3);
+                FTPoint frontPt1 = contour->FrontPoint(next);
                 FTPoint backPt = contour->BackPoint(cur);
-                FTPoint backPt1 = contour->BackPoint(n1);
+                FTPoint backPt1 = contour->BackPoint(next);
 
-                FTPoint normal = FTPoint(0.f, 0.f, 1.f) ^ (frontPt - nPt1);
+                FTPoint normal = FTPoint(0.f, 0.f, 1.f) ^ (frontPt - frontPt1);
                 if(normal != FTPoint(0.0f, 0.0f, 0.0f))
                 {
                     const FTGL_DOUBLE* pD = static_cast<const FTGL_DOUBLE*>(normal.Normalise());
@@ -274,14 +273,14 @@ void FTExtrudeGlyphImpl::RenderSide()
                 {
                     ftglVertex3f(backPt.Xf() / 64.0f, backPt.Yf() / 64.0f, 0.0f);
                     ftglVertex3f(frontPt.Xf() / 64.0f, frontPt.Yf() / 64.0f, -depth);
-                    ftglVertex3f(nPt1.Xf() / 64.0f, nPt1.Yf() / 64.0f, -depth);
+                    ftglVertex3f(frontPt1.Xf() / 64.0f, frontPt1.Yf() / 64.0f, -depth);
                     ftglVertex3f(backPt1.Xf() / 64.0f, backPt1.Yf() / 64.0f, 0.0f);
                 }
                 else
                 {
                     ftglVertex3f(backPt.Xf() / 64.0f, backPt.Yf() / 64.0f, -depth);
                     ftglVertex3f(frontPt.Xf() / 64.0f, frontPt.Yf() / 64.0f, 0.0f);
-                    ftglVertex3f(nPt1.Xf() / 64.0f, nPt1.Yf() / 64.0f, 0.f);
+                    ftglVertex3f(frontPt1.Xf() / 64.0f, frontPt1.Yf() / 64.0f, 0.f);
                     ftglVertex3f(backPt1.Xf() / 64.0f, backPt1.Yf() / 64.0f, -depth);
                 }
             }
